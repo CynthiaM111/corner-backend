@@ -16,18 +16,28 @@ const app = express();
 const server = http.createServer(app);
 
 // Initialize Socket.IO
+const allowedOrigins = [process.env.FRONTEND_URL, process.env.DEV_FRONTEND_URL, 'http://localhost:3000']
 const io = new Server(server, {
     cors: {
-        origin: process.env.FRONTEND_URL||'http://localhost:3000', // Update with your frontend's URL
+        origin: allowedOrigins,
+        credentials: true,
         methods: ['GET', 'POST'],
     },
 });
-console.log(process.env.FRONTEND_URL);
+
 // Middleware
 app.use(cors({
-    origin: process.env.FRONTEND_URL||'http://localhost:3000', // Update with your frontend's URL
-   
+    origin: function (origin, callback) {
+        // Allow requests with no origin (like mobile apps or curl requests)
+        if (!origin) return callback(null, true);
+        if (allowedOrigins.includes(origin)) {
+            return callback(null, true);
+        } else {
+            return callback(new Error('Not allowed by CORS'));
+        }
+    },
     credentials: true,
+    methods: ['GET', 'POST'],
 }));
 app.use(express.json());
 
