@@ -32,6 +32,9 @@ app.use(cors({
 app.use(express.json());
 
 // Routes
+app.get('/', (req, res) => {
+    res.send('Hello World');
+});
 app.use('/corner/auth', authRoutes);
 app.use('/corner/course', courseRoutes);
 app.use('/corner/course/question', createQuestionRoutes(io)); // Pass io to routes
