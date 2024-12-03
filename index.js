@@ -3,6 +3,7 @@ const http = require('http');
 const { Server } = require('socket.io');
 const cors = require('cors');
 const connectDB = require('./config/db');
+const path = require('path');
 const dotenv = require('dotenv');
 dotenv.config();
 
@@ -41,6 +42,14 @@ app.use('/corner/auth', authRoutes);
 app.use('/corner/course', courseRoutes);
 app.use('/corner/course/question', createQuestionRoutes(io)); // Pass io to routes
 app.use('/corner/user', userRoutes);
+
+// Serve static files
+app.use(express.static(path.join(__dirname, '../corner-app/build')));
+
+// Serve the index.html file for all routes that are not API routes
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, '../corner-app/build', 'index.html'));
+});
 
 // Database Connection
 connectDB(); // Ensure the database is connected before starting the server
