@@ -47,12 +47,12 @@ app.use('/corner/user', userRoutes);
 app.use(express.static(path.join(__dirname,'corner-app', 'build')));
 
 // Serve the index.html file for all routes that are not API routes
-app.get('*', (req, res) => {
-    if(req.path.startsWith('/corner')){
-        return res.status(404).send('Not Found');
-    }
-    res.sendFile(path.join(__dirname, 'corner-app', 'build', 'index.html'));
-});
+// app.get('*', (req, res) => {
+//     if(req.path.startsWith('/corner')){
+//         return res.status(404).send('Not Found');
+//     }
+//     res.sendFile(path.join(__dirname, 'corner-app', 'build', 'index.html'));
+// });
 
 // Database Connection
 connectDB(); // Ensure the database is connected before starting the server
