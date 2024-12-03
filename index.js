@@ -44,15 +44,12 @@ app.use('/corner/course/question', createQuestionRoutes(io)); // Pass io to rout
 app.use('/corner/user', userRoutes);
 
 // Serve static files
-// app.use(express.static(path.join(__dirname,'corner-app', 'build')));
+app.use(express.static(path.join(__dirname, 'build')));
 
-// Serve the index.html file for all routes that are not API routes
-// app.get('*', (req, res) => {
-//     if(req.path.startsWith('/corner')){
-//         return res.status(404).send('Not Found');
-//     }
-//     res.sendFile(path.join(__dirname, 'corner-app', 'build', 'index.html'));
-// });
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'build', 'index.html'));
+});
+
 
 // Database Connection
 connectDB(); // Ensure the database is connected before starting the server
