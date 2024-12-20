@@ -50,6 +50,9 @@ const getCoursesByStudentId = async (req, res) => {
         const { studentId } = req.params;
         const student = await User.findById(studentId).populate({
             path: 'courses',
+            match: {
+                schoolCode: student.schoolCode
+            },
             select: 'name teacherId', // fields you want to return from the course
             populate: {
                 path: 'teacherId',
@@ -63,16 +66,29 @@ const getCoursesByStudentId = async (req, res) => {
         console.log("populated courses", student.courses);
         res.status(200).json({ message: 'Courses fetched successfully', courses: student.courses });
     } catch (error) {
-        res.status(500).json({ msg: 'Failed to fetch courses' });
+        res.status(500).json({ msg: 'Failed to fetch courses', error: error.message });
     }
 };
 const getCourseById = async (req, res) => {
     try {
         const { courseId } = req.params;
-        const course = await Course.findById(courseId).populate('teacherId');
-        if (!course) {
-            return res.status(404).json({ msg: 'Course not found' });
+        const {userId} = req;
+
+        // Fetch the user's schoolCode to filter the course
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ msg: 'User not found' });
         }
+
+        const { schoolCode } = user;
+
+        // Fetch the course ensuring it matches the schoolCode
+        const course = await Course.findOne({ _id: courseId, schoolCode }).populate('teacherId');
+        if (!course) {
+            return res.status(404).json({ msg: 'Course not found or you do not have access to it' });
+        }
+
+        
         const questions = await Question.find({ courseId: courseId })
         .populate('createdBy')
         .populate({

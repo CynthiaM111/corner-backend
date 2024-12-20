@@ -11,6 +11,8 @@ const authRoutes = require('./routes/authRoutes');
 const courseRoutes = require('./routes/courseRoutes');
 const createQuestionRoutes = require('./routes/questionRoutes');
 const userRoutes = require('./routes/userRoutes');
+// const schoolRoutes = require('./routes/schoolRoutes');
+const adminRoutes = require('./routes/adminRoutes');
 
 // Initialize app and server
 const app = express();
@@ -42,7 +44,8 @@ app.use('/corner/auth', authRoutes);
 app.use('/corner/course', courseRoutes);
 app.use('/corner/course/question', createQuestionRoutes(io)); // Pass io to routes
 app.use('/corner/user', userRoutes);
-
+// app.use('/corner/schoolregister', schoolRoutes);
+app.use('/corner/admin', adminRoutes);
 // Serve static files
 app.use(express.static(path.join(__dirname,'build')));
 
