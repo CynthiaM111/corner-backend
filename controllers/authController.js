@@ -114,44 +114,42 @@ exports.signup = async (req, res) => {
 };
 
 
-
-
-// User login
 exports.login = async (req, res) => {
     const { email, password } = req.body;
+
     try {
-        const user = await User.findOne({ email })
-        if (!user || !(await bcrypt.compare(password, user.password))) {
-            return res.status(400).json({ msg: 'Invalid credentials' });
+        // Find the user by email
+        const user = await User.findOne({ email });
+        
+
+        if (!user) {
+            return res.status(400).json({ msg: 'Invalid credentials:user not found' });
         }
 
-        // Generate a unique verification code
-        const verificationCode = crypto.randomBytes(3).toString('hex') + user.schoolCode;
-        const expires = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
+        // Hash the input password using SHA-256
+        const hashedPassword = crypto.createHash('sha256').update(password).digest('hex');
 
+        // Compare the hashed password
+        if (hashedPassword !== user.password) {
+            return res.status(400).json({ msg: 'Invalid credentials:password not found' });
+        }
 
-        user.verificationCode = verificationCode;
-        user.verificationCodeExpires = expires;
-        await user.save();
+        // Check if email is verified
+        if (!user.emailVerified) {
+            return res.status(400).json({ msg: 'Please verify your email before logging in.' });
+        }
 
+        // Create a session token with expiration of 30 minutes
+        const token = jwt.sign(
+            { userId: user._id, role: user.role },
+            process.env.JWT_SECRET,
+            { expiresIn: '30m' } // Token expires in 30 minutes
+        );
 
-        // Initialize Mailgun
-        const mailgun = new Mailgun(formData);
-        const mg = mailgun.client({ username: 'api', key: process.env.MAILGUN_API_KEY || 'key-yourkeyhere' });
-        const verificationUrl = `${baseUrl}/verify?code=${verificationCode}&schoolCode=${user.schoolCode}`;
+        // Send token as response
+       
+        res.status(200).json({ message: 'Login successful!', token, role: user.role });
 
-
-        // Send the verification code via Mailgun
-        await mg.messages.create('cornerdiscussion.com', {
-            from: 'noreply@cornerdiscussion.com', // Your Mailgun verified domain
-            to: [email],
-            subject: 'Your Login Verification Code',
-            text: `Click the link below to verify your login and access your school resources: \n${ verificationUrl }\nThis link will expire in 15 minutes.
-            Do not share this link with anyone.`
-        
-        });
-
-        res.status(200).json({ message: 'Verification code sent to your email' });
     } catch (err) {
         console.error(err);
         res.status(500).send('Server error: ' + err);
