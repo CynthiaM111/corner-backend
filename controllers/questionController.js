@@ -5,7 +5,9 @@ const Course = require('../models/course');
 
 const addQuestion = async (req, res,io) => {
     const { courseId, content, title } = req.body;
-    const userId = req.user._id;
+    const user = req.user;
+    const userId = user.userId;
+    console.log("user id: ", userId);
 
     if(!title || !content || !courseId)
     {
@@ -57,7 +59,8 @@ const addComment = async (req, res,io) => {
     try {
         const { id } = req.params;
         const { text } = req.body;
-        const userId = req.user?._id; // Extracted from the JWT token
+        const user = req.user;
+        const userId = user.userId;
 
         if (!text) {
             return res.status(400).json({ message: 'Comment text is required' });
