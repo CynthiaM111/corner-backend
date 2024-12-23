@@ -10,7 +10,7 @@ const dotenv = require('dotenv');
 
 dotenv.config();
 
-const baseUrl = process.env.REACT_APP_FRONTEND_URL||'http://localhost:3000';
+const baseUrl = process.env.FRONTEND_URL||'http://localhost:3000';
 
 exports.signup = async (req, res) => {
     try {
