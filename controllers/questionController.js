@@ -36,24 +36,6 @@ const addQuestion = async (req, res,io) => {
     }
 };
 
-// const getQuestionsByCourseId = async (req, res) => {
-//     const { courseId } = req.params;
-
-//     try {
-//         const questions = await Question.find({ courseId }).populate({
-//             path: 'comments.author',
-//             select: 'name role'
-//         });
-//         if(!questions)
-//         {
-//             return res.status(404).json({ msg: 'No questions found' });
-//         }
-//         res.status(200).json({ questions });
-//     } catch (error) {
-//         console.error(error);
-//         res.status(500).json({ msg: 'Failed to fetch questions', error: error.message });
-//     }
-// };
 
 const addComment = async (req, res,io) => {
     try {
