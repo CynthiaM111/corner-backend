@@ -56,18 +56,19 @@ const enrollInCourse = async (req, res) => {
 const getCourseById = async (req, res) => {
     try {
         const { courseId } = req.params;
-        const {userId} = req;
+        const user = req.user;
+        const userId = user.userId;
 
         // Fetch the user's schoolCode to filter the course
-        const user = await User.findById(userId);
-        if (!user) {
+        const userInfo = await User.findById(userId);
+        if (!userInfo) {
             return res.status(404).json({ msg: 'User not found' });
         }
 
-        const { schoolCode } = user;
+        
 
         // Fetch the course ensuring it matches the schoolCode
-        const course = await Course.findOne({ _id: courseId, schoolCode }).populate('teacherId');
+        const course = await Course.findOne({ _id: courseId }).populate('teacherId');
         if (!course) {
             return res.status(404).json({ msg: 'Course not found or you do not have access to it' });
         }
