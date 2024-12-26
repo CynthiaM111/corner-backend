@@ -79,6 +79,12 @@ io.on('connection', (socket) => {
         console.log(`New comment broadcasted for question: ${questionId}`);
     });
 
+    // Broadcast new announcements
+    socket.on('announcementAdded', (announcement) => {
+        io.to(announcement.courseId).emit('newAnnouncement', announcement);
+        console.log('New announcement broadcasted:', announcement);
+    });
+
     // Leaving the room
     socket.on('leaveCourseRoom', (courseId) => {
         socket.leave(courseId);

@@ -1,6 +1,7 @@
 const Course = require('../models/course');
 const User = require('../models/user');
 const Question = require('../models/question');
+const Announcement = require('../models/announcement');
 
 const addCourse = async (req, res) => {
 
@@ -59,20 +60,17 @@ const getCourseById = async (req, res) => {
         const user = req.user;
         const userId = user.userId;
 
-        // Fetch the user's schoolCode to filter the course
+        // Fetch the user's the course
         const userInfo = await User.findById(userId);
         if (!userInfo) {
             return res.status(404).json({ msg: 'User not found' });
         }
-
-        
 
         // Fetch the course ensuring it matches the schoolCode
         const course = await Course.findOne({ _id: courseId }).populate('teacherId');
         if (!course) {
             return res.status(404).json({ msg: 'Course not found or you do not have access to it' });
         }
-
         
         const questions = await Question.find({ courseId: courseId })
         .populate('createdBy')
@@ -197,4 +195,52 @@ const getTeacherCourses = async (req, res) => {
     }
 };
 
-module.exports = { addCourse, getCoursesByTeacherId, getAllCourses, enrollInCourse,  getCourseById, getStudentCourses, getTeacherCourses };
+const addAnnouncement = async (req, res) => {
+    try {
+        const { courseId } = req.params;
+        const { title, content } = req.body;
+        const user = req.user;
+        const userId = user.userId;
+
+        // Check if course exists
+        const course = await Course.findById(courseId);
+        if (!course) {
+            return res.status(404).json({ error: 'Course not found' });
+        }
+
+        // Create new announcement
+        const announcement = new Announcement({
+            course: courseId,
+            title,
+            content,
+            createdBy: userId,
+            createdAt: new Date(),
+        });
+
+        await announcement.save();
+        res.status(201).json({ message: 'Announcement added', announcement });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
+
+const getAnnouncements = async (req, res) => {
+    try {
+        const { courseId } = req.params;
+
+        // Check if course exists
+        const course = await Course.findById(courseId);
+        if (!course) {
+            return res.status(404).json({ error: 'Course not found' });
+        }
+
+        // Fetch announcements sorted by createdAt (recent first)
+        const announcements = await Announcement.find({ course: courseId }).sort({ createdAt: -1 });
+
+        res.json({ announcements });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
+
+module.exports = { addCourse, getCoursesByTeacherId, getAllCourses, enrollInCourse,  getCourseById, getStudentCourses, getTeacherCourses, addAnnouncement, getAnnouncements };

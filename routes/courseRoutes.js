@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { addCourse, getCoursesByTeacherId, getAllCourses, enrollInCourse, getCourseById, getStudentCourses, getTeacherCourses } = require('../controllers/courseController');
+const { addCourse, getCoursesByTeacherId, getAllCourses, enrollInCourse, getCourseById, getStudentCourses, getTeacherCourses, addAnnouncement, getAnnouncements } = require('../controllers/courseController');
 const authMiddleware = require('../middleware/authMiddleware');
 
 
@@ -11,4 +11,7 @@ router.post('/enroll-in-courses', authMiddleware, enrollInCourse);
 router.get('/get-student-courses', authMiddleware, getStudentCourses);
 router.get('/get-course/:courseId', authMiddleware, getCourseById);
 router.get('/get-teacher-courses', authMiddleware, getTeacherCourses);
+router.post('/:courseId/add-announcement', authMiddleware, addAnnouncement);
+router.get('/:courseId/get-announcements', authMiddleware, getAnnouncements);
+
 module.exports = router;
