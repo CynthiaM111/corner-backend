@@ -4,7 +4,7 @@ const Course = require('../models/course');
 
 
 const addQuestion = async (req, res,io) => {
-    const { courseId, content, title } = req.body;
+    const { courseId, content, title,isAnonymous } = req.body;
     const user = req.user;
     const userId = user.userId;
     console.log("user id: ", userId);
@@ -20,7 +20,7 @@ const addQuestion = async (req, res,io) => {
             return res.status(404).json({ msg: 'Course not found' });
         }
 
-        const question = new Question({ courseId, createdBy: userId, content, title });
+        const question = new Question({ courseId, createdBy: userId, content, title, isAnonymous:isAnonymous||false });
         await question.save();
         const populatedQuestion = await question.populate('createdBy', 'name role');
 
