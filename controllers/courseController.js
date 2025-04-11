@@ -61,7 +61,7 @@ const getCourseById = async (req, res) => {
         const userId = user.userId;
 
         // Fetch the user's the course
-        const userInfo = await User.findById(userId);
+        const userInfo = await User.findById(userId).populate('teacherId','name');
         if (!userInfo) {
             return res.status(404).json({ msg: 'User not found' });
         }

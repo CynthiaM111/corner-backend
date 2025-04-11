@@ -62,7 +62,7 @@ exports.signup = async (req, res) => {
             const mg = mailgun.client({ username: 'api', key: process.env.MAILGUN_API_KEY });
 
             await mg.messages.create('cornerdiscussion.com', {
-                from: 'noreply@cornerdiscussion.com',
+                from: 'Mailgun Sandbox <postmaster@cornerdiscussion.com>',
                 to: email,
                 subject: 'Verify Your Email',
                 text: `Please verify your email to allow students and schools of your university to access your resources. Verify your email by clicking the link: ${baseUrl}/verify-email/${token}`,
