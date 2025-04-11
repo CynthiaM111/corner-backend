@@ -60,18 +60,14 @@ const getCourseById = async (req, res) => {
         const user = req.user;
         const userId = user.userId;
 
-        // Fetch the user's the course
-        const userInfo = await User.findById(userId).populate('teacherId','name');
-        if (!userInfo) {
-            return res.status(404).json({ msg: 'User not found' });
-        }
-
         // Fetch the course ensuring it matches the schoolCode
         const course = await Course.findOne({ _id: courseId }).populate('teacherId');
         if (!course) {
             return res.status(404).json({ msg: 'Course not found or you do not have access to it' });
         }
-        
+        if (String(course.teacherId._id) !== String(userId)) {
+            return res.status(403).json({ msg: 'You do not have access to this course' });
+        }
         const questions = await Question.find({ courseId: courseId })
         .populate('createdBy')
         .populate({
@@ -89,7 +85,7 @@ const getCourseById = async (req, res) => {
         );
         res.status(200).json({ course, questions: sortedQuestions });
     } catch (error) {
-        res.status(500).json({ msg: 'Failed to fetch course and questions' });
+        res.status(500).json({ msg: 'Failed to fetch course and questions', error: error.message });
     }
 };
 const getAllCourses = async (req, res) => {
