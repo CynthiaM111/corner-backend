@@ -15,6 +15,7 @@ const getUserInfo = async (req, res) => {
             name: userInfo.name,
             role: userInfo.role,
             school: userInfo.school?.name|| "Unknown",
+            userId: userInfo._id
         });
     } catch (error) {
         res.status(500).json({ message: 'Server error' });

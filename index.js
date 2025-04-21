@@ -13,7 +13,8 @@ const createQuestionRoutes = require('./routes/questionRoutes');
 const userRoutes = require('./routes/userRoutes');
 // const schoolRoutes = require('./routes/schoolRoutes');
 const adminRoutes = require('./routes/adminRoutes');
-
+const moduleRoutes = require('./routes/moduleRoutes');
+const moduleItemRoutes = require('./routes/moduleItemRoutes');
 // Initialize app and server
 const app = express();
 const server = http.createServer(app);
@@ -40,12 +41,15 @@ app.use(express.json());
 app.get('/', (req, res) => {
     res.send('Hello World');
 });
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/corner/auth', authRoutes);
 app.use('/corner/course', courseRoutes);
 app.use('/corner/course/question', createQuestionRoutes(io)); // Pass io to routes
 app.use('/corner/user', userRoutes);
 // app.use('/corner/schoolregister', schoolRoutes);
 app.use('/corner/admin', adminRoutes);
+app.use('/corner/modules', moduleRoutes);
+app.use('/corner/module-items', moduleItemRoutes);
 // Serve static files
 app.use(express.static(path.join(__dirname,'build')));
 

@@ -7,7 +7,6 @@ const addCourse = async (req, res) => {
 
     const user = req.user;
     const teacherId = user.userId;
-    console.log("teacherId", teacherId);
     const { name, description } = req.body;
     console.log("Add Course Request:", { teacherId, name, description });
     try {
