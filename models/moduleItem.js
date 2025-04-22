@@ -30,6 +30,11 @@ const moduleItemSchema = new mongoose.Schema({
         ref: 'Module',
         required: true
     },
+    teacherId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: true
+    },
     position: Number,
     isPublished: {
         type: Boolean,

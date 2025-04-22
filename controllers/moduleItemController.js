@@ -9,7 +9,7 @@ const multer = require('multer');
 // create module item
 const createModuleItem = async (req, res) => {
     try {
-        const { moduleId, title, type, textContent, url } = req.body;
+        const { moduleId, title, type, content, url } = req.body;
 
         // Verify the teacher owns the module
         const module = await Module.findOne({
@@ -19,6 +19,9 @@ const createModuleItem = async (req, res) => {
 
         if (!module) {
             return res.status(403).json({ msg: 'Not authorized to add content to this module' });
+        }
+        if (!req.user?.userId) {
+            return res.status(403).json({ msg: 'Unauthorized: No teacher ID found' });
         }
 
         // Get next position
@@ -37,12 +40,12 @@ const createModuleItem = async (req, res) => {
         };
 
         if (type === 'text') {
-            itemData.content = { text: textContent };
+            itemData.content = { text: content.text };
         } else if (type === 'link') {
-            itemData.content = { url };
+            itemData.content = { url: content.url };
         } else if (req.file) {
             itemData.file = {
-                path: req.file.path,
+                path: `module-items/${req.file.filename}`,
                 mimetype: req.file.mimetype,
                 size: req.file.size,
                 originalname: req.file.originalname
@@ -71,7 +74,7 @@ const getModuleItems = async (req, res) => {
         }
 
         // Check permissions
-        const isTeacher = module.teacherId.toString() === req.user.userId;
+        const isTeacher = module.teacherId.equals(req.user.userId);
         const query = { moduleId: req.params.moduleId };
 
         if (!isTeacher) {
@@ -92,7 +95,7 @@ const getModuleItems = async (req, res) => {
 const updateModuleItem = async (req, res) => {
     try {
         const { id } = req.params;
-        const { title, type, textContent, url } = req.body;
+        const { title, type, content, url } = req.body;
 
         const item = await ModuleItem.findById(id);
 
@@ -101,7 +104,7 @@ const updateModuleItem = async (req, res) => {
         }
 
         // Check permissions
-        const isTeacher = item.teacherId.toString() === req.user.userId;
+        const isTeacher = item.teacherId.equals(req.user.userId);
 
         if (!isTeacher) {
             return res.status(403).json({ msg: 'Not authorized to update this item' });
@@ -110,8 +113,12 @@ const updateModuleItem = async (req, res) => {
         // Update item
         item.title = title;
         item.type = type;
-        item.content = type === 'link' ? { url } : { text: textContent };
-
+        if (type === 'text' && content?.text) {
+            item.content = { text: content.text }; // Override fully (or merge if needed)
+        }
+        else if (type === 'link' && content?.url) {
+            item.content = { url: content.url };
+        }
         if (req.file) {
             item.file = {
                 path: req.file.path,
@@ -139,19 +146,21 @@ const deleteModuleItem = async (req, res) => {
             return res.status(404).json({ msg: 'Module item not found' });
         }
 
-        // Check permissions
-        const isTeacher = item.teacherId.toString() === req.user.userId;
+        if (!item.teacherId || !req.user?.userId) {
+            return res.status(403).json({ msg: 'Unauthorized: Missing teacher ID' });
+        }
+        const isTeacher = item.teacherId.toString() === req.user.userId.toString();
 
         if (!isTeacher) {
             return res.status(403).json({ msg: 'Not authorized to delete this item' });
         }
 
-        await item.remove();
+        await item.deleteOne();
 
         res.json({ msg: 'Module item deleted successfully' });
     } catch (err) {
         console.error(err.message);
-        res.status(500).send('Server Error');
+        res.status(500).json({ msg: err.message, error: err.stack});
     }
 };
 

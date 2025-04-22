@@ -31,6 +31,8 @@ const createModule = async (req, res) => {
         });
 
         await newModule.save();
+        course.modules.push(newModule._id);
+        await course.save();
         res.status(201).json(newModule);
     } catch (err) {
         console.error(err.message);
@@ -133,7 +135,7 @@ const deleteModule = async (req, res) => {
             { $inc: { position: -1 } }
         );
 
-        await module.remove();
+        await module.deleteOne();
         res.json({ msg: 'Module removed' });
     } catch (err) {
         console.error(err.message);
