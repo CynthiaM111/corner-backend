@@ -2,9 +2,9 @@ const ModuleItem = require('../models/moduleItem');
 const path = require('path');
 const Module = require('../models/module');
 const multer = require('multer');
-// configure file storage
-
-
+const upload = require('../utilities/multerConfig');
+const s3 = require('../utilities/s3Config');
+const { PutObjectCommand } = require('@aws-sdk/client-s3');
 
 // create module item
 const createModuleItem = async (req, res) => {
@@ -44,8 +44,19 @@ const createModuleItem = async (req, res) => {
         } else if (type === 'link') {
             itemData.content = { url: content.url };
         } else if (req.file) {
+            const ext = path.extname(req.file.originalname);
+            const fileName = `module-items/${Date.now()}${ext}`;
+            const uploadParams = {
+                Bucket: process.env.S3_BUCKET_NAME,
+                Key: fileName,
+                Body: req.file.buffer,
+                ContentType: req.file.mimetype
+            };
+            await s3.send(new PutObjectCommand(uploadParams));
+            const fileUrl = `https://${process.env.S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${fileName}`;
             itemData.file = {
-                path: `module-items/${req.file.filename}`,
+                path: fileUrl,
+                key: fileName,
                 mimetype: req.file.mimetype,
                 size: req.file.size,
                 originalname: req.file.originalname

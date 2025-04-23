@@ -1,14 +1,5 @@
 const multer = require('multer');
-const path = require('path');
 
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, path.join(__dirname, '../uploads/module-items'));
-    },
-    filename: (req, file, cb) => {
-        cb(null, `${Date.now()}-${file.originalname}`);
-    }
-});
 
 //File filter for allowed file types
 const fileFilter = (req, file, cb) => {
@@ -27,6 +18,11 @@ const fileFilter = (req, file, cb) => {
     }
 };
 
-const upload = multer({ storage, fileFilter, limits: { fileSize: 1024 * 1024 * 50 } });
+// Memory storage instead of multer-s3
+const upload = multer({
+    storage: multer.memoryStorage(),
+    fileFilter,
+    limits: { fileSize: 1024 * 1024 * 50 }, // 50MB
+});
 
 module.exports = upload;
