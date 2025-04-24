@@ -9,7 +9,7 @@ const { PutObjectCommand } = require('@aws-sdk/client-s3');
 // create module item
 const createModuleItem = async (req, res) => {
     try {
-        const { moduleId, title, type, content, url } = req.body;
+        const { moduleId, title, type, content } = req.body;
 
         // Verify the teacher owns the module
         const module = await Module.findOne({
