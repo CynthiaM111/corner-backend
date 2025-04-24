@@ -3,7 +3,6 @@ const User = require('../models/user');
 const Question = require('../models/question');
 const Announcement = require('../models/announcement');
 
-
 const addCourse = async (req, res) => {
 
     const user = req.user;
@@ -239,4 +238,28 @@ const getAnnouncements = async (req, res) => {
     }
 };
 
-module.exports = { addCourse, getCoursesByTeacherId, getAllCourses, enrollInCourse,  getCourseById, getStudentCourses, getTeacherCourses, addAnnouncement, getAnnouncements };
+const getCourseQuestions = async (req, res) => {
+    try {
+        const { courseId } = req.params;
+        
+        // Find all questions for this course and populate the creator and comments
+        const questions = await Question.find({ courseId })
+            .populate('createdBy', 'name role')
+            .populate('comments.author', 'name role')
+            .sort({ createdAt: -1 }); // Sort by newest first
+
+        res.status(200).json({
+            success: true,
+            questions
+        });
+    } catch (error) {
+        console.error('Error fetching course questions:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to fetch course questions',
+            error: error.message
+        });
+    }
+};
+
+module.exports = { addCourse, getCoursesByTeacherId, getAllCourses, enrollInCourse,  getCourseById, getStudentCourses, getTeacherCourses, addAnnouncement, getAnnouncements, getCourseQuestions };

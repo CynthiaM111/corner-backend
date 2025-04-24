@@ -41,7 +41,7 @@ app.use(express.json());
 
 app.use('/corner/auth', authRoutes);
 app.use('/corner/course', courseRoutes);
-app.use('/corner/course/question', createQuestionRoutes(io)); // Pass io to routes
+app.use('/corner/course', createQuestionRoutes(io)); // Pass io to routes
 app.use('/corner/user', userRoutes);
 // app.use('/corner/schoolregister', schoolRoutes);
 app.use('/corner/admin', adminRoutes);
