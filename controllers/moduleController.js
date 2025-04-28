@@ -82,8 +82,8 @@ const updateModule = async (req, res) => {
         }
 
         // Verify the teacher owns the module
-        console.log("module.teacherId",module.teacherId, req.user.id)
-        if (module.teacherId.toString() !== req.user.id) {
+        
+        if (module.teacherId.toString() !== req.user.userId) {
             return res.status(403).json({ msg: 'Not authorized to update this module' });
         }
 
@@ -123,9 +123,9 @@ const deleteModule = async (req, res) => {
         if (!module) {
             return res.status(404).json({ msg: 'Module not found' });
         }
-
+        
         // Verify the teacher owns the module
-        if (module.teacherId.toString() !== req.user.id) {
+        if (module.teacherId.toString() !== req.user.userId) {
             return res.status(403).json({ msg: 'Not authorized to delete this module' });
         }
 

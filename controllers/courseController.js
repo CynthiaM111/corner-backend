@@ -259,7 +259,19 @@ const getCourseQuestions = async (req, res) => {
             message: 'Failed to fetch course questions',
             error: error.message
         });
+
     }
 };
 
-module.exports = { addCourse, getCoursesByTeacherId, getAllCourses, enrollInCourse,  getCourseById, getStudentCourses, getTeacherCourses, addAnnouncement, getAnnouncements, getCourseQuestions };
+const updateCourse = async (req, res) => {
+    const { courseId } = req.params;
+    const { name } = req.body;
+    await Course.findByIdAndUpdate(courseId, { name });
+};
+const deleteCourse = async (req, res) => {
+    const { courseId } = req.params;
+    await Course.findByIdAndDelete(courseId);
+    res.status(200).json({ message: 'Course deleted successfully' });
+};
+
+module.exports = { addCourse, getCoursesByTeacherId, getAllCourses, enrollInCourse,  getCourseById, getStudentCourses, getTeacherCourses, addAnnouncement, getAnnouncements, getCourseQuestions, updateCourse, deleteCourse };
