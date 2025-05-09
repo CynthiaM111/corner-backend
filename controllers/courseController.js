@@ -8,12 +8,10 @@ const addCourse = async (req, res) => {
     const user = req.user;
     const teacherId = user.userId;
     const { name, description } = req.body;
-    console.log("Add Course Request:", { teacherId, name, description });
     try {
         
         const course = new Course({ name, teacherId, description });
         await course.save();
-        console.log("course saved", course);
         res.status(201).json({ message: 'Course added successfully', course });
     } catch (error) {
         res.status(500).json({ error: 'Failed to add course'+error.message });
@@ -43,10 +41,16 @@ const enrollInCourse = async (req, res) => {
         const student = await User.findById(studentId);
         if (!student) return res.status(404).json({ msg: 'Student not found' });
 
-        student.courses = [... new Set([...student.courses, ...courses])]; // Assuming courses are an array of course IDs
-        await student.save();
+        // Add new courses and avoid duplicates
+        const updatedCourses = [...new Set([...student.courses, ...courses])];
 
-        res.status(200).json({ message: 'Courses selected successfully', courses: student.courses });
+        // Update student's courses
+        await User.findByIdAndUpdate(studentId, { courses: updatedCourses });
+
+        res.status(200).json({
+            message: 'Courses enrolled successfully',
+            courses: updatedCourses
+        });
     } catch (error) {
         console.log('Error in enrollInCourse:', error.message, error.stack);
         res.status(500).json({ msg: 'Failed to select courses', error: error.message });
@@ -64,24 +68,28 @@ const getCourseById = async (req, res) => {
         if (!course) {
             return res.status(404).json({ msg: 'Course not found or you do not have access to it' });
         }
-        if (String(course.teacherId._id) !== String(userId)) {
+
+        // If user is a teacher, verify they own the course
+        // If user is a student, verify they are enrolled in the course
+        if (user.role === 'teacher' && String(course.teacherId._id) !== String(userId)) {
             return res.status(403).json({ msg: 'You do not have access to this course' });
         }
+
         const questions = await Question.find({ courseId: courseId })
-        .populate('createdBy')
-        .populate({
-            path: 'comments.author',
-            select: 'name role'
-        })
-        .sort({ createdAt: -1 });
+            .populate('createdBy')
+            .populate({
+                path: 'comments.author',
+                select: 'name role'
+            })
+            .sort({ createdAt: -1 });
 
         const sortedQuestions = await Promise.all(
             questions.map(async (question) => {
-                // Sort comments by timestamp, newest first
                 question.comments.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
                 return question;
             })
         );
+        
         res.status(200).json({ course, questions: sortedQuestions });
     } catch (error) {
         res.status(500).json({ msg: 'Failed to fetch course and questions', error: error.message });

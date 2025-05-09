@@ -147,6 +147,7 @@ exports.login = async (req, res) => {
         );
 
         // Send token as response
+        console.log("User school", user.school);
        
         res.status(200).json({ message: 'Login successful!', token, role: user.role });
 

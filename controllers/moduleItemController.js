@@ -85,14 +85,14 @@ const getModuleItems = async (req, res) => {
         }
 
         // Check permissions
-        const isTeacher = module.teacherId.equals(req.user.userId);
-        const query = { moduleId: req.params.moduleId };
+        // const isTeacher = module.teacherId.equals(req.user.userId);
+        // const query = { moduleId: req.params.moduleId };
 
-        if (!isTeacher) {
-            query.isPublished = true;
-        }
+        // if (!isTeacher) {
+        //     query.isPublished = true;
+        // }
 
-        const items = await ModuleItem.find(query)
+        const items = await ModuleItem.find({ moduleId: req.params.moduleId })
             .sort({ position: 1 });
 
         res.json(items);

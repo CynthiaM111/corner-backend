@@ -48,22 +48,26 @@ const getCourseModules = async (req, res) => {
             return res.status(404).json({ msg: 'Course not found' });
         }
 
-        // Check if user is teacher or student
         const isTeacher = course.teacherId.toString() === req.user.userId;
         // const isStudent = course.students.includes(req.user.id);
 
-        if (!isTeacher) {
-            return res.status(403).json({ msg: 'Not authorized to view these modules' });
-        }
+        // if (!isTeacher) {
+        //     return res.status(403).json({ msg: 'Not authorized to view these modules' });
+        // }
 
-        const query = { courseId: req.params.courseId };
-        if (!isTeacher) {
-            query.isPublished = true; // Students only see published modules
-        }
+        // const query = { courseId: req.params.courseId };
+        // if (!isTeacher) {
+        //     query.isPublished = true; // Students only see published modules
+        // }
 
-        const modules = await Module.find(query)
+        // const modules = await Module.find(query)
+        //     .sort({ position: 1 })
+        //     .populate('items');
+        
+        const modules = await Module.find({ courseId: req.params.courseId })
             .sort({ position: 1 })
             .populate('items');
+
 
         res.json(modules);
     } catch (err) {
