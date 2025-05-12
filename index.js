@@ -15,6 +15,7 @@ const userRoutes = require('./routes/userRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const moduleRoutes = require('./routes/moduleRoutes');
 const moduleItemRoutes = require('./routes/moduleItemRoutes');
+const courseAiRoutes = require('./routes/courseAiRoutes');
 // Initialize app and server
 const app = express();
 const server = http.createServer(app);
@@ -47,6 +48,7 @@ app.use('/corner/user', userRoutes);
 app.use('/corner/admin', adminRoutes);
 app.use('/corner/modules', moduleRoutes);
 app.use('/corner/module-items', moduleItemRoutes);
+app.use('/corner/ai', courseAiRoutes);
 // Serve static files
 app.use(express.static(path.join(__dirname,'build')));
 
