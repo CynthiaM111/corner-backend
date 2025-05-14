@@ -14,6 +14,19 @@ const chatPrompt = async (req, res) => {
         if (!userId || !courseId || !courseName) {
             return res.status(400).json({ error: 'Missing required fields' });
         }
+        // Fetch recent chat history for context (limit to last 10 exchanges)
+        const pastChats = await ChatHistory.find({ userId, courseId })
+            .sort({ createdAt: -1 })
+            .limit(10)
+            .lean(); // optional, to speed up read
+
+        // Build chat history in OpenAI message format
+        const messageHistory = pastChats
+            .reverse() // chronological order
+            .flatMap(chat => ([
+                { role: 'user', content: chat.prompt },
+                { role: 'assistant', content: chat.response }
+            ]));
 
         const systemMessage = {
             role: "system",
@@ -21,13 +34,15 @@ const chatPrompt = async (req, res) => {
             If this is the first message in the conversation, start by welcoming the student and recommending 5 relevant papers, books, or websites that relate to ${courseName}.
             Then proceed to assist with any course-related questions.`
         };
+        const messages = [
+            systemMessage,
+            ...messageHistory,
+            { role: 'user', content: prompt }
+        ];
 
         const completion = await openai.chat.completions.create({
             model: "gpt-3.5-turbo",
-            messages: [
-                systemMessage,
-                { role: "user", content: prompt }
-            ],
+            messages: messages,
         });
 
         const aiResponse = completion.choices[0].message.content;
